@@ -11,7 +11,10 @@ it('provides the flashed toast to Nova scripts when serving', function (): void 
 
     // Nova::serving() registers via Event::listen(ServingNova::class), so firing
     // the event runs the package provider callback (registers the script + var).
-    event(new ServingNova(app(), request()));
+    // Resolve the event from the container so its constructor is autowired for
+    // whichever Nova major is installed — Nova 4 takes (Request), Nova 5 takes
+    // (Application, Request).
+    event(app(ServingNova::class));
 
     expect(Nova::jsonVariables(request()))
         ->toHaveKey('novaToast')
@@ -30,7 +33,7 @@ it('provides the flashed toast to Nova scripts when serving', function (): void 
 });
 
 it('provides a null toast variable when nothing was flashed', function (): void {
-    event(new ServingNova(app(), request()));
+    event(app(ServingNova::class));
 
     expect(Nova::jsonVariables(request()))
         ->toHaveKey('novaToast')
